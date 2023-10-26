@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bnw.beta.domain.member.dao.MemberDAO">
+    <sql id="search2">
+        <choose>
+            <!-- 키워드가 있는 경우 -->
+            <when test="keyword != null and keyword != ''">
+                <choose>
+                    <!-- 날짜가 있는 경우 -->
+                    <when test="(startDate != null and startDate != '') or (endDate != null and endDate != '')">
+                        <choose>
+                            <!-- searchType값에 따른 분기 -->
+                            <when test="searchType == 'member_id'">
+                                member_id LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == 'member_phone'">
+                               member_phone LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == 'member_name'">
+                                member_name LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == ''">
+                                1=1
+                            </when>
+                        </choose>
+                        AND join_date BETWEEN #{startDate} AND #{endDate}
+                        <choose>
+                            <!-- searchType2가 있는 경우 -->
+                            <when test="searchType2 != null and searchType2 != ''">
+                                AND role LIKE CONCAT('%', #{searchType2}, '%')
+                                <choose>
+                                    <!-- searchType3가 있는 경우 -->
+                                    <when test="searchType3 != null and searchType3 != ''">
+                                        AND license LIKE CONCAT('%', #{searchType3}, '%')
+                                    </when>
+                                </choose>
+                            </when>
+                            <otherwise>
+                                <choose>
+                                    <!-- searchType3가 있는 경우 -->
+                                    <when test="searchType3 != null and searchType3 != ''">
+                                        AND license LIKE CONCAT('%', #{searchType3}, '%')
+                                    </when>
+                                </choose>
+                            </otherwise>
+                        </choose>
+                    </when>
+                    <!-- startDate와 endDate가 없는 경우 -->
+                    <otherwise>
+                        <choose>
+                            <!-- searchType값에 따른 분기 -->
+                            <when test="searchType == 'member_id'">
+                                member_id LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == 'member_phone'">
+                                member_phone LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == 'member_name'">
+                                member_name LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == ''">
+                                1=1
+                            </when>
+                        </choose>
+                        <choose>
+                            <!-- searchType2가 있는 경우 -->
+                            <when test="searchType2 != null and searchType2 != ''">
+                                AND role LIKE CONCAT('%', #{searchType2}, '%')
+                                <choose>
+                                    <!-- searchType3가 있는 경우 -->
+                                    <when test="searchType3 != null and searchType3 != ''">
+                                        AND license LIKE CONCAT('%', #{searchType3}, '%')
+                                    </when>
+                                </choose>
+                            </when>
+                            <otherwise>
+                                <choose>
+                                    <!-- searchType3가 있는 경우 -->
+                                    <when test="searchType3 != null and searchType3 != ''">
+                                        AND license LIKE CONCAT('%', #{searchType3}, '%')
+                                    </when>
+                                </choose>
+                            </otherwise>
+                        </choose>
+                    </otherwise>
+                </choose>
+            </when>
+            <!-- 키워드가 없는 경우 -->
+            <otherwise>
+                <choose>
+                    <!-- 날짜가 있는 경우 -->
+                    <when test="(startDate != null and startDate != '') or (endDate != null and endDate != '')">
+                        <choose>
+                            <!-- searchType값에 따른 분기 -->
+                            <when test="searchType == 'member_id'">
+                                member_id LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == 'member_phone'">
+                                member_phone LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == 'member_name'">
+                                member_name LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == ''">
+                                1=1
+                            </when>
+                        </choose>
+                        AND join_date BETWEEN #{startDate} AND #{endDate}
+                        <choose>
+                            <!-- searchType2가 있는 경우 -->
+                            <when test="searchType2 != null and searchType2 != ''">
+                                AND role LIKE CONCAT('%', #{searchType2}, '%')
+                                <choose>
+                                    <!-- searchType3가 있는 경우 -->
+                                    <when test="searchType3 != null and searchType3 != ''">
+                                        AND license LIKE CONCAT('%', #{searchType3}, '%')
+                                    </when>
+                                </choose>
+                            </when>
+                            <otherwise>
+                                <choose>
+                                    <!-- searchType3가 있는 경우 -->
+                                    <when test="searchType3 != null and searchType3 != ''">
+                                        AND license LIKE CONCAT('%', #{searchType3}, '%')
+                                    </when>
+                                </choose>
+                            </otherwise>
+                        </choose>
+                    </when>
+                    <!-- startDate와 endDate가 없는 경우 -->
+                    <otherwise>
+                        <choose>
+                            <!-- searchType값에 따른 분기 -->
+                            <when test="searchType == 'member_id'">
+                                AND member_id LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == 'member_phone'">
+                                AND member_phone LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == 'member_name'">
+                                AND member_name LIKE CONCAT('%', #{keyword}, '%')
+                            </when>
+                            <when test="searchType == ''">
+                                1=1
+                            </when>
+                        </choose>
+                        <choose>
+                            <!-- searchType2가 있는 경우 -->
+                            <when test="searchType2 != null and searchType2 != ''">
+                                AND role LIKE CONCAT('%', #{searchType2}, '%')
+                                <choose>
+                                    <!-- searchType3가 있는 경우 -->
+                                    <when test="searchType3 != null and searchType3 != ''">
+                                        AND license LIKE CONCAT('%', #{searchType3}, '%')
+                                    </when>
+                                </choose>
+                            </when>
+                            <otherwise>
+                                <choose>
+                                    <!-- searchType3가 있는 경우 -->
+                                    <when test="searchType3 != null and searchType3 != ''">
+                                        AND license LIKE CONCAT('%', #{searchType3}, '%')
+                                    </when>
+                                </choose>
+                            </otherwise>
+                        </choose>
+                    </otherwise>
+                </choose>
+            </otherwise>
+        </choose>
+    </sql>
+    <!--약관동의-->
+    <insert id="memberAgree" parameterType="MemberDTO">
+        <![CDATA[
+        INSERT INTO termsrecord(terms_record, member_id)
+        VALUES (#{terms_record}, #{member_id})
+        ]]>
+    </insert>
+
+    <!--회원가입-->
+    <insert id="memberJoin" parameterType="MemberDTO">
+        <![CDATA[
+        INSERT INTO member (member_id, member_pw, member_name, member_birth, member_email, member_gender, member_phone, member_tell, member_agree_m, member_agree_p, member_isshow, role)
+        VALUES (#{member_id}, #{member_pw}, #{member_name}, #{member_birth}, #{member_email}, #{member_gender}, #{member_phone}, #{member_tell}, #{member_agreeM}, #{member_agreeP}, 'Y',#{role})
+        ]]>
+    </insert>
+
+    <!--아이디중복체크-->
+    <select id="idCheck" parameterType="String" resultType="int">
+        <![CDATA[
+        SELECT COUNT(member_id) FROM member WHERE member_id = #{id}
+        ]]>
+    </select>
+
+    <!--이메일중복체크-->
+    <select id="emailCheck" parameterType="String" resultType="int">
+        <![CDATA[
+        SELECT COUNT(member_email) FROM member WHERE member_email = #{email}
+        ]]>
+    </select>
+
+    <!--핸드폰중복체크-->
+    <select id="phoneCheck" parameterType="String" resultType="int">
+        <![CDATA[
+        SELECT COUNT(member_phone) FROM member WHERE member_phone = #{phone}
+        ]]>
+    </select>
+
+    <!-- 교육자 번호 중복 체크 -->
+    <select id="codeDuplicate" parameterType="String" resultType="Integer">
+        <![CDATA[
+        SELECT COUNT(*) FROM member WHERE edu_code = #{edu_code};
+        ]]>
+    </select>
+
+    <!-- 교육자 번호 조회 -->
+    <select id="codeCheck" parameterType="String" resultType="Integer">
+        <![CDATA[
+        SELECT count(*) FROM code WHERE edu_code = #{edu_code};
+        ]]>
+    </select>
+
+
+    <!--///////////member_no & member_name 불러오기 -->
+    <select id="getMemberInfo" parameterType="String">
+     <![CDATA[
+        SELECT m.*, COUNT(p.pay_no) AS pay_count
+        FROM member m
+                 LEFT JOIN pay p ON m.member_id = p.member_id
+        WHERE m.member_id = #{member_id}
+        GROUP BY m.member_id;
+        ]]>
+    </select>
+
+    <!--///////////member롤 불러오기  김현민 -->
+    <select id="getRoleById" parameterType="String">
+        <![CDATA[
+        SELECT role
+        FROM member
+        WHERE member_id = #{member_id};
+        ]]>
+    </select>
+
+    <!--///////////로그인된 아이디 불러오기  김현민 -->
+    <select id="loginByUsername" parameterType="String">
+        SELECT * FROM member WHERE member_id = #{username}
+    </select>
+
+    <!--회원 아이디 찾기-->
+    <select id="findIDbyUserName" resultType="MemberDTO" >
+        SELECT *
+        FROM member
+        WHERE member_name = #{name} AND member_email = #{email}
+    </select>
+
+    <select id="findByUserIdAndEmail" resultType="MemberDTO" >
+        SELECT *
+        FROM member
+        WHERE member_id = #{id} AND member_email = #{email}
+    </select>
+
+    <update id="updatePassword" parameterType="map">
+        UPDATE member
+        SET member_pw = #{newPassword}
+        WHERE member_id = #{id}
+    </update>
+
+
+    <!--회원 비번 찾기-->
+  <!--  <select id="findPwbyUserId" resultType="MemberDTO" >
+        SELECT *
+        FROM member
+        WHERE member_id = #{id} AND member_email = #{email}
+    </select>-->
+
+        <select id="findPasswordByEmail" resultType="string" parameterType="string">
+            SELECT member_pw
+            FROM member
+            WHERE member_email = #{email}
+        </select>
+
+
+    <!--회원목록 조회 관리자용-->
+    <select id="memberlist" parameterType="map" resultType="MemberDTO">
+        select member_no, role, member_id, member_name, member_phone, member_email, license, join_date
+        from member
+        <where>
+            <include refid="search2"></include>
+        </where>
+        LIMIT #{size} OFFSET #{page}
+
+    </select>
+    <!--회원목록 카운트-->
+    <select id="count" parameterType="int">
+        select count(*)
+        from member
+        <where>
+            <include refid="search2"></include>
+        </where>
+    </select>
+    
+    <!-- 회원 license 업데이트 -->
+    <update id="updateLicense" parameterType="String">
+        UPDATE member
+        SET license = "유료"
+        WHERE member_id = #{member_id}
+    </update>
+</mapper>

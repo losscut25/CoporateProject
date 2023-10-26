@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <title>둑며들다|Q&A</title>
+   <div th:replace="~{common/fragments/config :: configFragment}"></div>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/guide/question/questionlist.css}">
+</head>
+<body>
+<div th:replace="~{common/fragments/header :: headerFragment}"></div>
+<div class="content">
+    <div th:replace="~{common/sidebar/guide_sidebar :: guide_sidebarFragment}"></div>
+    <div class="content-wrap">
+
+        <div id="qList">
+
+                <div id="qList_title">
+                    <h2 class="head">Q&A 리스트</h2>
+                </div>
+
+                <div id="qList_header">
+                    <div id="rightHeader">
+                        <a th:href="@{/question/add}" class="btn btn-primary selectMemberBtn">질문등록하기</a>
+                        <a th:href="@{/question/mypost}" class="btn btn-primary selectMemberBtn">내 질문 보기</a>
+                    </div>
+                </div>
+
+                <div id="qList_list">
+                    <table>
+                        <thead id="title">
+                        <tr>
+
+                            <th class="num">번호</th>
+                            <th class="subject">제목</th>
+                            <th class="answer">답글</th>
+                            <th class="user">글쓴이</th>
+                            <th class="createdate">질문등록일</th>
+                        </tr>
+                        </thead>
+                        <tbody id="list">
+
+                        <tr th:each="question : ${questions}">
+                            <td th:text="${question.qna_no}"></td>
+                            <td><a th:href="@{/question/detail/{id}(id=${question.qna_no})}"
+                                   th:text="${question.qna_title}"></a></td>
+
+                            <td>
+                                <span th:if="${question.answerCount > 0}" th:text="${question.answerCount}"></span>
+                            </td>
+
+                            <td th:text="${question.member_id}"></td>
+                            <!--<td th:text="${question.qna_regdate}"></td>-->
+                            <td th:text="${#temporals.format(question.qna_regdate, 'yyyy-MM-dd HH:mm')}"></td>
+
+                        </tr><!--1페이지당 출력할 게시물수만큼 반복끝-->
+
+
+
+
+
+                        </tbody>
+                    </table>
+
+
+
+                    <div class="pagination">
+                        <div class="paging">
+                            <div class="text-center clearfix" th:if="${totalPages > 0}">
+                                <div class="pagingNum">
+                                    <ul class="pagination-container" id="pagination">
+
+                                        <li class="page-item" th:class="${currentPage == 1} ? 'disabled' : ''">
+                                            <a th:href="${currentPage == 1} ? '#' : @{(${isMyPost} ? '/question/mypost' : '/question/list')(page=${currentPage - 1})}">Pre</a>
+                                        </li>
+
+                                        <li class="page-item" th:each="pageNum : ${#numbers.sequence(1, totalPages)}"
+                                            th:class="${pageNum == currentPage} ? 'active-page' : ''">
+                                            <a th:href="${isMyPost} ? @{/question/mypost(page=${pageNum})} : @{/question/list(page=${pageNum})}" th:text="${pageNum}">Page number</a>
+                                        </li>
+
+                                        <li class="page-item" th:class="${currentPage == totalPages} ? 'disabled' : ''">
+                                            <a th:href="${currentPage == totalPages} ? '#' : @{(${isMyPost} ? '/question/mypost' : '/question/list')(page=${currentPage + 1})}">Next</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+<!--
+        <table class="table">
+            <thead class="table-dark">
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>글쓴이</th>
+                <th>질문등록일</th>
+            </tr>
+            </thead>
+            <tbody>
+            &lt;!&ndash;1페이지당 출력할 게시물수만큼 반복시작
+              *페이징처리에서 글번호 공식에 사용되는 개념
+                 paging정보.getTotalElements:총게시물수
+                 paging정보.number:현재 페이지 번호
+                 paging정보.size:페이지당게시물개수
+                 loop정보.index:나열 인덱스(0부터 시작.for반복문내부의 index)
+                 여기에서는 한페이지당 게시글수를 10-> 0~9 =>0첫번째페이지 글번호12 11 10~3
+                 여기에서는 한페이지당 게시글수를 2-> 0~1=>1 두번째페이지 글번호 2 1
+              &ndash;&gt;
+            <tr th:each="question : ${questions}">
+                <td th:text="${question.qna_no}"></td>
+                <td><a th:href="@{/question/detail/{id}(id=${question.qna_no})}"
+                       th:text="${question.qna_title}"></a></td>
+
+                <td>
+                    <span th:if="${question.answerCount > 0}" th:text="${question.answerCount}"></span>
+                </td>
+
+                <td th:text="${question.member_id}"></td>
+                <td th:text="${question.qna_regdate}"></td>
+
+
+            </tr>&lt;!&ndash;1페이지당 출력할 게시물수만큼 반복끝&ndash;&gt;
+            </tbody>
+        </table>-->
+
+
+    </div>
+</div>
+<div th:replace="~{common/fragments/footer :: footerFragment}"></div>
+</body>
+</html>

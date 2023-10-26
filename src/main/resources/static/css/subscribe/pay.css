@@ -1,0 +1,343 @@
+@charset "UTF-8";
+
+.main-content{
+width: 100%;
+height: 780px;
+display: flex;
+flex-direction: column;
+}
+.navbar {
+background-color: #7290dd;
+    overflow: hidden;
+    display: flex;
+    width: 100%;
+    border-radius:8px;
+}
+
+/* 네비게이션 바 링크 스타일 */
+.navbar a {
+       float: left;
+       display: block;
+       color: white;
+       text-align: center;
+       padding: 14px 16px;
+       text-decoration: none;
+       font-size: 20px;
+       cursor: pointer;
+       font-weight: bolder;
+       font-family: 'Binggrae', sans-serif;
+}
+
+/* 링크에 마우스를 올렸을 때의 스타일 */
+.navbar a:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+/* 활성 링크 스타일 (현재 페이지를 나타냄) */
+.navbar a.active {
+    background-color: #4CAF50;  /* 원하는 색상으로 변경 가능 */
+    color: white;
+}
+
+.navbar a.selected {
+    background-color: #ddd; /* 예시: 회색 배경 */
+}
+
+.content-row {
+    display: flex;
+    align-items: start;
+    height: 100%;
+    width:100%;
+}
+
+.image-container {
+    display: flex;
+    align-items: center;
+    position: relative;  /* 상대적 위치 설정 */
+    width: 450px;  /* .poster의 너비 + 마진 조정 */
+    height: 100%;  /* .poster의 높이 + 마진 조정 */
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.poster {
+    width: 430px;
+    height: 500px;
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #e0e0e0;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.3s ease-in-out;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+}
+
+.image {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+}
+
+.img-button{
+    z-index: 2;
+    display: flex;
+    gap: 360px;
+    margin-top: 512px;
+}
+.fa-solid, .fas {
+    font-weight: bold;
+    border: none;
+    font-size: 34px;
+    }
+
+.pay-list {
+    flex: 2;  /* 오른쪽 영역을 좀 더 넓게 설정 (선택적) */
+}
+
+.form-container{
+display: flex;
+justify-content: center;
+align-items: center;
+height: 40px;
+width: 100%;
+margin-top:10px;
+}
+.pay-list{
+
+    width: 100%;
+    display: flex;
+    height: 100%;
+}
+
+.pay-box{
+display: grid;
+width: 100%;
+height: 100%;
+margin-top:20px;
+}
+.pay-titlebox{
+display: flow;
+height: 62%;
+font-size: 17px;
+margin: 10px;
+border-bottom: 1px solid;
+}
+.pay-title{
+background-color: #fbfaf3;
+height: 44px;
+width: auto;
+display: flex;
+justify-content: flex-start;
+align-items: center;
+font-weight: bold;
+padding-left: 20px;
+font-size: 20px;
+box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+border-radius: 9px
+}
+.pay-titlecontent{
+height: auto;
+width: auto;
+margin-left: 30px;
+margin-top: 10px;
+font-weight:bold;
+}
+
+.pay-orderbox{
+display: flow;
+height: 90%;
+font-size: 17px;
+margin: 10px;
+border-bottom: 1px solid;
+}
+.pay-ordertitle{
+background-color: #fbfaf3;
+height: 44px;
+width: auto;
+display: flex;
+justify-content: flex-start;
+align-items: center;
+font-weight: bold;
+padding-left: 20px;
+font-size: 20px;
+box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+border-radius: 9px
+}
+.pay-ordercontent{
+height: auto;
+width: auto;
+margin-left: 30px;
+margin-top: 10px;
+font-weight:bold;
+}
+.productlist{
+display: inline;
+width: 300px;
+margin-left: 20px;
+height: 30px;
+text-align: center;
+border-radius:5px;
+}
+.mypaylist{
+    height: 24px;
+    width: 170px;
+    margin-left: 20px;
+    border-radius: 5px;
+    border: 1px solid;
+    display: contents;
+}
+
+.pay-infobox{
+display: flow;
+height: 80%;
+font-size: 17px;
+margin: 10px;
+border-bottom: 1px solid;
+}
+.pay-infotitle{
+background-color: #fbfaf3;
+height: 44px;
+width: auto;
+display: flex;
+justify-content: flex-start;
+align-items: center;
+font-weight: bold;
+padding-left: 20px;
+font-size: 20px;
+box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+border-radius: 9px
+}
+.pay-name{
+height: auto;
+width: auto;
+margin-left: 30px;
+margin-top: 10px;
+font-weight:bold;
+}
+.buyer-name{
+height: 24px;
+width: auto;
+margin-left: 20px;
+border-radius: 5px;
+border: 1px solid;
+}
+.pay-phone{
+height: auto;
+width: auto;
+margin-left: 30px;
+margin-top: 10px;
+font-weight:bold;
+}
+.buyer-phone{
+height: 24px;
+width: auto;
+margin-left: 37px;
+border-radius: 5px;
+border: 1px solid;
+}
+
+.depotiortitle{
+height: auto;
+width: auto;
+margin-left: 30px;
+margin-top: 10px;
+font-weight:bold;
+}
+.pay-depositor{
+height: 24px;
+width: auto;
+margin-left: 20px;
+border-radius: 5px;
+border: 1px solid;
+}
+
+.pay-pricebox{
+    display: flow;
+    height: 50%;
+    font-size: 17px;
+    margin: 10px;
+}
+.pricetitle{
+background-color: #fbfaf3;
+height: 44px;
+width: auto;
+display: flex;
+justify-content: flex-start;
+align-items: center;
+font-weight: bold;
+padding-left: 20px;
+font-size: 20px;
+box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+border-radius: 9px
+}
+.order-total{
+height: 24px;
+    display: flex;
+    width: 166px;
+    margin-left: 51px;
+    border-radius: 5px;
+    border: 1px solid;
+    font-size: 20px;
+    font-weight:bold;
+}
+
+.buttonbox{
+display: flex;
+justify-content: center;
+height: auto;
+}
+.submit-button{
+background-color: #f9ecbe;
+height: 40px;
+width: 220px;
+font-size: 20px;
+font-weight: bold;
+border-radius: 5px;
+border:none;
+box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+font-family: 'Binggrae', sans-serif;
+}
+.submit-button:hover {
+background-color: #f9da8d;
+cursor: pointer;
+}
+.error-message{
+color: red;
+    display: flex;
+    font-size: 14px;
+}
+
+
+.tag-container {
+    display: flex;
+    gap: 5px;
+    margin:0px;
+}
+
+.tag {
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    padding: 5px 10px;
+    display: inline-flex;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.delete-btn {
+    color: red;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    text-decoration: underline;
+}
+
+

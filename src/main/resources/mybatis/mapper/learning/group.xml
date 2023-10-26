@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bnw.beta.domain.learning.dao.GroupDAO">
+
+    <!-- 그룹등록 가능한 게임콘텐츠 Cnt -->
+    <select id="groupAddListCnt" resultType="int">
+        SELECT COUNT(*) AS count
+        FROM (
+        SELECT
+        MAX(p.pay_no) AS max_pay_no,
+        g.game_title, g.game_total, g.game_level, g.game_no, g.game_content,
+        m.member_name, f.filegame_name,
+        MAX(p.pay_date) AS pay_date, MAX(p.pay_enddate) AS pay_enddate,
+        COALESCE(SUM(s.group_cnt), 0) AS total_group_cnt
+        FROM
+        pay p
+        JOIN
+        game g ON p.game_no = g.game_no
+        LEFT JOIN
+        studygroup s ON p.game_no = s.game_no AND p.member_id = s.member_id
+        LEFT JOIN
+        filegame f ON g.game_no = f.game_no
+        JOIN member m ON p.member_id = m.member_id
+        WHERE
+        p.member_id = #{member_id}
+        <if test="game_title != null and game_title != ''">
+            AND g.game_title = #{game_title}
+        </if>
+        <![CDATA[
+        AND CURDATE() <= (
+        SELECT MAX(pay_enddate)
+        FROM pay
+        WHERE game_no = g.game_no
+        )
+        ]]>
+        GROUP BY
+        g.game_no,g.game_title, g.game_total, g.game_level, g.game_content,
+        m.member_name, f.filegame_name
+        ORDER BY pay_enddate ASC
+        ) AS subquery;
+    </select>
+
+    <!-- 게임 콘텐츠 title 조회 -->
+    <select id="selectGameTitle" resultType="GroupDTO">
+        <![CDATA[
+        SELECT
+        MAX(p.pay_no) AS max_pay_no,
+        g.game_title, g.game_total, g.game_level, g.game_no, g.game_content,
+        m.member_name, f.filegame_name,
+        MAX(p.pay_date) AS pay_date, MAX(p.pay_enddate) AS pay_enddate,
+        COALESCE(SUM(s.group_cnt), 0) AS total_group_cnt
+        FROM
+        pay p
+        JOIN
+        game g ON p.game_no = g.game_no
+        LEFT JOIN
+        studygroup s ON p.game_no = s.game_no AND p.member_id = s.member_id
+        LEFT JOIN
+        filegame f ON g.game_no = f.game_no
+        JOIN member m ON p.member_id = m.member_id
+        WHERE
+        p.member_id = #{member_id}
+        GROUP BY
+        g.game_no,g.game_title, g.game_total, g.game_level, g.game_content,
+        m.member_name, f.filegame_name
+        ORDER BY pay_enddate ASC
+        ]]>
+    </select>
+
+    <!-- 그룹등록 가능한 게임콘텐츠 조회(무한 스크롤) -->
+    <select id="groupAddList" parameterType="GroupDTO" resultType="GroupDTO">
+        <![CDATA[
+        SELECT
+        MAX(p.pay_no) AS pay_no,
+        g.game_title, g.game_total, g.game_level, g.game_no, g.game_content,
+        m.member_name, f.filegame_name,
+        MAX(p.pay_date) AS pay_date, MAX(p.pay_enddate) AS pay_enddate,
+        COALESCE(SUM(s.group_cnt), 0) AS group_cnt
+        FROM
+        pay p
+        JOIN
+        game g ON p.game_no = g.game_no
+        LEFT JOIN
+        studygroup s ON p.game_no = s.game_no AND p.member_id = s.member_id
+        LEFT JOIN
+        filegame f ON g.game_no = f.game_no
+        JOIN member m ON p.member_id = m.member_id
+        WHERE
+        p.member_id = #{member_id}
+        ]]>
+        <if test="game_title != null and game_title != ''">
+            AND g.game_title = #{game_title}
+        </if>
+        <![CDATA[
+        AND CURDATE() <= (
+        SELECT MAX(pay_enddate)
+        FROM pay
+        WHERE game_no = g.game_no
+        )
+        GROUP BY
+        g.game_no,g.game_title, g.game_total, g.game_level, g.game_content,
+        m.member_name, f.filegame_name
+        ORDER BY pay_enddate ASC
+        LIMIT #{LIMIT} OFFSET #{OFFSET};
+        ]]>
+    </select>
+
+    <!-- 그룹 등록을 위한 게임 콘텐츠 정보 불러오기 -->
+    <select id="gameGroupInfo" parameterType="Integer" resultType="GroupDTO">
+        <![CDATA[
+        SELECT
+        MAX(p.pay_no) AS pay_no,
+        g.game_title, g.game_total, g.game_level, g.game_no,
+        m.member_name, COALESCE(SUM(s.group_cnt), 0) AS group_cnt,
+        p.pay_date, p.pay_enddate
+        FROM
+        pay p
+        JOIN
+        game g ON p.game_no = g.game_no
+        LEFT JOIN
+        studygroup s ON p.game_no = s.game_no AND p.member_id = s.member_id
+        JOIN member m ON p.member_id = m.member_id
+        WHERE p.pay_no = #{pay_no}
+        GROUP BY
+        g.game_no, g.game_title, g.game_total, g.game_level, m.member_name;
+        ]]>
+    </select>
+
+    <!-- 학습 그룹 등록(상세) -->
+    <insert id="insertGroup" parameterType="GroupDTO">
+        INSERT INTO studygroup (game_no, group_name, group_intro, member_id, group_cnt, group_startdate, group_enddate)
+        VALUES (#{game_no}, #{group_name}, #{group_intro}, #{member_id}, #{group_cnt}, #{group_startdate}, #{group_enddate});
+    </insert>
+
+    <!-- 학습 그룹 조회 목록 불러오기 -->
+    <select id="groupListSelect" parameterType="GroupDTO" resultType="GroupDTO">
+        <![CDATA[
+        SELECT sg.group_no, sg.group_name, sg.group_startdate, sg.group_enddate, sg.group_cnt, sg.group_nowcnt,
+        g.game_title, g.game_level
+        FROM studygroup AS sg
+        JOIN game AS g ON sg.game_no = g.game_no
+        WHERE
+            sg.member_id = #{member_id}
+        ]]>
+        <if test="group_name != null and group_name != ''">
+            AND sg.group_name = #{group_name}
+        </if>
+    </select>
+
+    <!-- 학습 그룹 name 조회 -->
+    <select id="selectGroupName" parameterType="GroupDTO" resultType="GroupDTO">
+        <![CDATA[
+        SELECT group_name, group_no
+        FROM studygroup
+        WHERE member_id = #{member_id}
+        AND group_enddate >= CURDATE()
+        ]]>
+    </select>
+
+    <!-- 학습 그룹 상세 조회 -->
+    <select id="selectGroupDetail" parameterType="GroupDTO" resultType="GroupDTO">
+        <![CDATA[
+        SELECT
+        m.member_name, m.member_phone, m.member_email, m.join_date,
+        g.group_name, g.group_cnt, g.group_nowcnt,
+        ga.game_title
+        FROM
+        groupmember AS gm
+        JOIN
+        member AS m ON gm.member_no = m.member_no
+        JOIN
+        studygroup AS g ON gm.group_no = g.group_no
+        JOIN
+        game AS ga ON gm.game_no = ga.game_no
+        WHERE
+        gm.group_no = #{group_no} AND gm.approve_state = '승인'
+        ]]>
+        <if test="group_name != null and group_name != ''">
+            AND g.group_name = #{group_name}
+        </if>
+    </select>
+    <!-- 특정 그룹 조회 -->
+    <select id="selectGroupUpdate" parameterType="GroupDTO" resultType="GroupDTO">
+        <![CDATA[
+        SELECT
+        p.pay_date, p.pay_enddate,
+        g.game_title, g.game_no, g.game_total,
+        m.member_name,
+        sg.group_no, sg.group_name, sg.group_intro, sg.group_startdate, sg.group_enddate, sg.group_cnt, sg.group_nowcnt
+        FROM pay p
+        INNER JOIN game g ON p.game_no = g.game_no
+        INNER JOIN studygroup sg ON p.game_no = sg.game_no
+        INNER JOIN member m ON p.member_id = m.member_id
+        WHERE p.member_id = #{member_id} AND sg.group_no = #{group_no};
+        ]]>
+    </select>
+
+    <!-- 그룹 등록 가능한 인원수 구하기 위한 쿼리 -->
+    <select id="currentGroupCnt" parameterType="GroupDTO" resultType="Integer">
+        <![CDATA[
+        SELECT
+        SUM(CASE WHEN sg.group_no <> #{group_no} THEN sg.group_cnt ELSE 0 END) AS total_group_cnt
+        FROM
+        studygroup sg
+        WHERE
+        sg.game_no = #{game_no} AND sg.member_id = #{member_id}
+        GROUP BY
+        sg.game_no, sg.member_id;
+        ]]>
+    </select>
+
+    <!-- 학습 그룹 수정 -->
+    <update id="updateGroup">
+        UPDATE studygroup
+        SET group_name = #{group_name}, group_cnt = #{group_cnt},
+            group_startdate = #{group_startdate}, group_enddate = #{group_enddate},
+            group_intro = #{group_intro}
+        WHERE group_no = #{group_no};
+    </update>
+
+    <!-- 학습 그룹 삭제 -->
+    <delete id="deleteGroup" parameterType="java.util.List">
+        <![CDATA[
+        DELETE FROM studygroup
+        WHERE group_no IN
+        ]]>
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+        #{item}
+        </foreach>
+    </delete>
+
+    <!-- 그룹 학생 가입승인 목록 -->
+    <select id="selectGroupApprove" parameterType="map" resultType="GroupDTO">
+        <![CDATA[
+        SELECT sg.group_name, sg.group_cnt, sg.group_nowcnt,
+               gm.gm_no, gm.group_no, gm.member_no, gm.approve_date,
+               m.member_name, m.member_phone
+        FROM studygroup AS sg
+        JOIN groupmember AS gm ON sg.group_no = gm.group_no
+        JOIN member AS m ON gm.member_no = m.member_no
+        WHERE sg.group_nowcnt < sg.group_cnt
+        AND gm.approve_state = '미승인'
+        ]]>
+        <if test="member_id != null and member_id != ''">
+            AND sg.member_id = #{member_id}
+        </if>
+        <if test="group_no != null and group_no != ''">
+            AND sg.group_no = #{group_no}
+        </if>
+        <if test="group_no == null">
+            AND 1 = 0
+        </if>
+        <![CDATA[
+        ORDER BY gm.approve_date ASC
+        LIMIT #{page}, #{size};
+        ]]>
+    </select>
+
+    <!-- 그룹 학생 가입승인 목록 갯수 -->
+    <select id="selectGroupApproveCount" parameterType="map" resultType="Integer">
+        <![CDATA[
+        SELECT COUNT(*) AS record_count
+        FROM groupmember gm
+        JOIN member m ON gm.member_no = m.member_no
+        JOIN studygroup sg ON gm.group_no = sg.group_no
+        JOIN game g ON gm.game_no = g.game_no
+        WHERE sg.member_id = #{member_id}
+        AND gm.approve_state = '미승인'
+        ]]>
+        <if test="group_no != null and group_no != ''">
+            AND sg.group_no = #{group_no}
+        </if>
+    </select>
+
+    <!-- 그룹 학생 가입승인 정보 -->
+    <select id="selectGroupInfo" parameterType="Integer" resultType="GroupDTO">
+        <if test="group_no != null and group_no != ''">
+            <![CDATA[
+            SELECT sg.group_no, sg.group_name, sg.group_cnt, sg.group_nowcnt, g.game_title, g.game_level,
+            COUNT(CASE WHEN gm.approve_state = '승인' THEN 1 END) AS member_count
+            FROM studygroup sg
+            JOIN game g ON sg.game_no = g.game_no
+            LEFT JOIN groupmember gm ON sg.group_no = gm.group_no
+            WHERE sg.group_no = #{group_no}
+            GROUP BY sg.group_no;
+            ]]>
+        </if>
+    </select>
+
+    <!-- 학습자 가입상태 업데이트 -->
+    <update id="updateGroupMembber">
+        UPDATE groupmember
+        SET approve_state = #{state}
+        WHERE gm_no IN
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <!--///////////////////학습자/////////////////// -->
+
+    <!-- 학습 그룹 가입 신청 목록 -->
+    <select id="selectJoinGroup" resultType="GroupDTO">
+        <![CDATA[
+        SELECT sg.*, m.member_no, m.member_name, fg.filegame_name
+        FROM studygroup sg
+        JOIN member m ON sg.member_id = m.member_id
+        LEFT JOIN groupmember gm ON sg.group_no = gm.group_no AND gm.member_no = #{member_no}
+        LEFT JOIN filegame fg ON sg.game_no = fg.game_no
+        WHERE sg.group_nowcnt < sg.group_cnt
+        ]]>
+        <if test="group_name != null and group_name != ''">
+            AND sg.group_name = #{group_name}
+        </if>
+        <if test="member_name != null and member_name != ''">
+            AND m.member_name = #{member_name}
+        </if>
+        <![CDATA[
+        ORDER BY sg.group_enddate
+        LIMIT #{LIMIT} OFFSET #{OFFSET};
+        ]]>
+    </select>
+
+    <!-- 그룹 가입신청 가능한 목록 갯수 -->
+    <select id="joinGroupCount" parameterType="map" resultType="Integer">
+        <![CDATA[
+        SELECT count(*)
+        FROM studygroup sg
+        JOIN member m ON sg.member_id = m.member_id
+        LEFT JOIN groupmember gm ON sg.group_no = gm.group_no AND gm.member_no = #{member_no}
+        WHERE sg.group_nowcnt < sg.group_cnt
+        AND gm.member_no IS NULL
+        ]]>
+        <if test="group_name != null and group_name != ''">
+            AND sg.group_name = #{group_name}
+        </if>
+        <if test="member_name != null and member_name != ''">
+            AND m.member_name = #{member_name}
+        </if>
+    </select>
+
+    <!-- 그룹명 목록 불러오기 -->
+    <select id="selectGroupTitle" resultType="GroupDTO">
+        <![CDATA[
+        SELECT DISTINCT group_name
+        FROM studygroup
+        WHERE group_nowcnt < group_cnt;
+        ]]>
+    </select>
+
+    <!-- 교육자명 불러오기 -->
+    <select id="selectEducatorName" resultType="GroupDTO">
+        <![CDATA[
+        SELECT DISTINCT m.member_name, m.member_no
+        FROM studygroup AS sg
+        JOIN member AS m ON m.member_id = sg.member_id
+        WHERE sg.group_nowcnt < sg.group_cnt;
+        ]]>
+    </select>
+
+    <!-- 그룹 신청 가능 실시간 체크1 -->
+    <select id="checkJoin" parameterType="Integer" resultType="Integer">
+        <![CDATA[
+        SELECT group_no
+        FROM studygroup
+        WHERE (group_cnt - group_nowcnt) <> 0
+        ]]>
+        <if test="group_no != null and group_no != ''">
+            AND group_no = #{group_no}
+        </if>
+    </select>
+
+    <!-- 그룹 신청 가능 실시간 체크2 -->
+    <select id="checkJoin2" parameterType="GroupDTO" resultType="Integer">
+        SELECT count(*)
+        FROM groupmember
+        WHERE group_no = #{group_no} AND member_no = #{member_no};
+    </select>
+
+    <!-- 학생 그룹 가입신청 Insert -->
+    <insert id="insertGroupJoin" parameterType="GroupDTO">
+        <![CDATA[
+        INSERT INTO groupmember (member_no, group_no, game_no)
+        VALUES (#{member_no}, #{group_no}, #{game_no});
+        ]]>
+    </insert>
+
+    <!-- 학생 그룹 현재인원 Update -->
+    <update id="updateGroupJoin">
+        <![CDATA[
+        UPDATE studygroup
+        SET group_nowcnt = group_nowcnt + #{num}
+        WHERE group_no = #{group_no};
+        ]]>
+    </update>
+
+    <!-- 가입신청 내역 목록 -->
+    <select id="myjoinList" resultType="GroupDTO">
+        <![CDATA[
+        SELECT
+        m.member_name,
+        gm.approve_date, gm.approve_state,
+        g.game_no, g.game_title, g.game_total, g.game_level, g.game_no,
+        sg.group_no, sg.group_name, sg.group_intro, sg.group_cnt, sg.group_nowcnt, sg.group_startdate, sg.group_enddate,
+        fg.filegame_name
+        FROM
+            groupmember gm
+        JOIN studygroup sg ON gm.group_no = sg.group_no
+        JOIN member m ON sg.member_id = m.member_id
+        JOIN game g ON gm.game_no = g.game_no
+        LEFT JOIN filegame fg ON g.game_no = fg.game_no
+        ]]>
+        WHERE gm.member_no = #{member_no}
+        <if test = "member_name != null and member_name != ''">
+            AND m.member_name = #{member_name}
+        </if>
+        <if test="group_name != null and group_name != ''">
+            AND sg.group_name = #{group_name}
+        </if>
+        <![CDATA[
+        ORDER BY gm.approve_date DESC
+        LIMIT #{LIMIT} OFFSET #{OFFSET};
+        ]]>
+    </select>
+
+    <!-- 가입신청 내역 목록 갯수 -->
+    <select id="myjoinListCount" resultType="Integer">
+        <![CDATA[
+        SELECT COUNT(*)
+        FROM
+            groupmember gm
+        JOIN studygroup sg ON gm.group_no = sg.group_no
+        JOIN member m ON sg.member_id = m.member_id
+        JOIN game g ON gm.game_no = g.game_no
+        LEFT JOIN filegame fg ON g.game_no = fg.game_no
+        ]]>
+        WHERE gm.member_no = #{member_no}
+        <if test = "member_name != null and member_name != ''">
+            AND m.member_name = #{member_name}
+        </if>
+        <if test="group_name != null and group_name != ''">
+            AND sg.group_name = #{group_name}
+        </if>
+    </select>
+
+    <!-- 가입내역 그룹명 목록 -->
+    <select id="myjoinListTitle" resultType="GroupDTO">
+        <![CDATA[
+        SELECT DISTINCT sg.group_name
+        FROM groupmember gm
+        JOIN studygroup sg ON gm.group_no = sg.group_no
+        WHERE gm.member_no = #{member_no}
+        ORDER BY sg.group_name ASC;
+        ]]>
+    </select>
+
+    <!-- 가입내역 교육자 목록 -->
+    <select id="myjoinListEducator" resultType="GroupDTO">
+        <![CDATA[
+        SELECT DISTINCT m.member_name
+        FROM groupmember gm
+        JOIN studygroup sg ON gm.group_no = sg.group_no
+        JOIN member m ON sg.member_id = m.member_id
+        WHERE gm.member_no = #{member_no}
+        ORDER BY m.member_name ASC;
+        ]]>
+    </select>
+</mapper>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<head>
+    <meta charset="UTF-8">
+    <title>둑며들다|QnA</title>
+    <div th:replace="~{common/fragments/config :: configFragment}"></div>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/guide/question/question.css}">
+</head>
+<body>
+<div th:replace="~{common/fragments/header :: headerFragment}"></div>
+<div class="content">
+    <div th:replace="~{common/sidebar/guide_sidebar :: guide_sidebarFragment}"></div>
+    <div class="content-wrap">
+
+        <div class="password-form" id="passwordFormDiv" th:unless="${isAdmin or isPasswordCorrect}">
+            <form action="/question/verifyPassword" method="post">
+                <input type="hidden" name="id" th:value="${questionDTO.qna_no}" />
+                <label for="pw">비밀번호 입력:</label>
+                <input type="password" id="pw" name="pw" required />
+                <input type="submit" value="확인" />
+                <br>
+                <span style="color:red;" th:text="${errormessage}"></span>
+            </form>
+        </div>
+
+
+        <!--비밀번호 맞았을시 보이는 화면-->
+
+        <div id="questionDetailDiv" th:if="${isAdmin or isPasswordCorrect}">
+            <div class = "questiontitle">
+
+                <div class="form-group">
+                    <div class = "form-group-horizontal">
+                        <label class="fixed-width-label">글 제목</label>
+                        <textarea class="textarea1" th:text="${questionDTO.qna_title}" id="qna_title" name="qna_title" readonly></textarea>
+                    </div>
+                    <div class = "form-group-horizontal">
+                        <label class="fixed-width-label" >작성자</label>
+                        <textarea class="textarea1" id="member_id" th:text="${questionDTO.member_id}" name="member_id" readonly></textarea>
+                    </div>
+                    <div class = "form-group-horizontal">
+                        <label class="fixed-width-label" >작성날짜</label>
+                        <textarea class="textarea1" id="qna_regdate" th:text="${#temporals.format(questionDTO.qna_regdate, 'yyyy-MM-dd HH:mm')}" name="qna_regdate" readonly></textarea>
+                    </div>
+                    <div class="form-group-horizontal">
+                        <label class="fixed-width-label">질문 내용</label>
+                        <textarea class="textarea2" id="qna_content" th:text="${questionDTO.qna_content}" name="qna_content" readonly></textarea>
+                    </div>
+
+
+
+            <!-- 첨부파일 -->
+                <div class="form-group-horizontal">
+                    <label class="fixed-width-label">첨부파일</label>
+                    <!-- 이미지 미리보기 -->
+                    <div th:if="${fileQuestion != null && fileQuestion.filequ_name != null}">
+                        <img class="fileup" th:src="@{/question/image/{name}(name=${fileQuestion.filequ_name})}" alt="Uploaded image" width="300">
+                    </div>
+                    <!-- 첨부파일 다운로드 링크 -->
+                    <div th:if="${fileQuestion != null && fileQuestion.filequ_name != null}">
+                        <a class="fileup" th:href="@{/question/download/{name}(name=${fileQuestion.filequ_name})}">이미지 다운</a>
+                    </div>
+                </div>
+
+
+            <!-- 댓글목록 -->
+            <div th:each="question : ${question}">
+                    <div class="form-group-horizontal">
+                        <label for="ans_content" class="fixed-width-label" >답글 내용</label>
+                        <textarea class="textarea4" id="ans_content" th:text="${question.ans_content}" name="ans_content" readonly placeholder="아직 관리자의 답글이 없어요 조금만 기다려주세요"></textarea>
+                    </div>
+
+                    <!-- 관리자 동작 -->
+                    <div th:if="${question.ans_content != null and question.ans_content != ''}" class="form-group-horizontal" sec:authorize="hasRole('ADMIN')">
+                        <button class="btn_update" type="button" th:onclick="|window.location.href='/answer/modify/' + ${question.ans_no}|">답글 수정</button>
+                        <button class="delete-button" th:onclick="|deleteAnswer(${question.ans_no})|">답글 삭제</button>
+                    </div>
+            </div>
+
+
+
+            <!--답글작성-->
+
+            <div class="form-group-horizontal">
+             <label for="ans_write" class="fixed-width-label" >답글 작성</label>
+
+                <form method="post" id="answerForm" th:action="@{|/answer/add/${questionDTO.qna_no}|}" th:object="${answerForm}">
+                    <textarea class="textarea6" placeholder="댓글 내용을 입력해주세요."  sec:authorize="hasRole('ADMIN')" th:field="*{answer}"></textarea>
+                    <p sec:authorize="!hasRole('ADMIN')">답글은 관리자만 작성할 수 있습니다</p>
+                    <input type="submit" value="등록" class="btn_sub" sec:authorize="hasRole('ADMIN')">
+                </form>
+            </div>
+
+            <!--수정-->
+
+            <div class="btn_box">
+                <!-- 질문수정버튼 - 로그인해야지만 수정가능, 로그인한유저가 글쓴이와 동일해야만 한다 -->
+                <a class="btn_update"
+                   sec:authorize="isAuthenticated()"
+                   th:href="@{|/question/modify/${questionDTO.qna_no}|}"
+                   th:if="${ login_id!=null and login_id==qna_id}"
+                   th:text="질문수정"></a>
+                <!-- 질문삭제버튼 - 로그인해야지만 삭제가능, 로그인한유저가 글쓴이와 동일해야만 한다-->
+                <a href="javascript:void(0);" class="btn_del"
+                   sec:authorize="isAuthenticated()"
+                   th:data-uri="@{|/question/delete/${questionDTO.qna_no}|}"
+                   th:if="${ login_id!=null and login_id==qna_id}"
+                   th:text="질문삭제"></a>
+            </div>
+
+        </div>
+
+      </div>
+
+
+
+        </div>
+            <a href="/question/list">Back to List</a>
+
+    </div><!--<div class="content-wrap">-->
+    </div>
+</div>
+
+
+
+<div th:replace="~{common/fragments/footer :: footerFragment}"></div>
+
+
+<script type="text/javascript">
+    function deleteAnswer(ans_no) {
+        if (confirm('답변을 삭제하시겠습니까?')) { // 사용자에게 삭제 여부 재확인
+            window.location.href = '/answer/delete/' + ans_no;
+        }
+    }
+</script>
+
+<script layout:fragment="script">
+    //삭제버튼 클릭시
+    const delElements = document.getElementsByClassName("btn_del");
+    Array.from(delElements).forEach(function(element){
+
+        //$(".delete").on("click",function(){ alert("정말삭제할거여?"); });
+        element.addEventListener("click",function(){
+            if(confirm("정말 삭제하시겠습니까?")){
+                //click이벤트가 발생한 a요소의  data-uri속성의 값을 가져와
+                //location객체의 href속성의 값으로 적용해라
+                //=>현재 browser의 URL주소를 변경해라
+                location.href=this.dataset.uri;
+                //location.href="/question/delete/${questionDTO.qna_no}";//삭제요청
+            };
+        });
+    });
+
+</script>
+
+</body>
+</html>

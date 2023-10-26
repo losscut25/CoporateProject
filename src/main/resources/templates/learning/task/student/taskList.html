@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<head>
+    <meta charset="UTF-8">
+    <title>둑며들다|진도 등록</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/learning/task/student/taskList.css}">
+    <script type="text/javascript" th:src="@{/js/learning/task/student/taskList.js}"></script>
+    <div th:replace="~{common/fragments/config :: configFragment}"></div>
+</head>
+<body>
+<div th:replace="~{common/fragments/header :: headerFragment}"></div>
+<div class="content">
+    <div th:replace="~{common/sidebar/stu_sidebar :: stu_sidebarFragment}"></div>
+    <div class="content-wrap">
+        <div class="main-content">
+            <form id="submitTask" th:action="@{/student/submitTask}" method="post">
+                <div class="main-title">
+                    <div class="student-name">
+                        <h1 class="h1">학습자 : <span th:text="${member_name}"></span></h1>
+                    </div>
+                    <div class="title-button-wrap">
+                        <button type="submit" id="submitButton" class="submitBtn" disabled>제출하기</button>
+                    </div>
+                </div>
+                <div class="guide">
+                    <span>미작성 숙제는 제출하실 수 없습니다. 반드시 숙제를 작성 후 제출해주세요.</span>
+                </div>
+                <div class="contents-container">
+                    <div class="mycontents-list">
+                        <div class="checkbox" th:each="task : ${taskList}">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" class="checkbox-input" th:attr="data-game-no=${task.tasksend_no}" name="tasksend_no[]" th:value="${task.tasksend_no}" th:disabled="${task.task_state == '미작성'}"/>
+                                <span class="checkbox-title">
+                                    <div class="card">
+                                        <div class="card-details">
+                                            <div class="card-title">
+                                                <div class="game-title"><span th:text="${task.game_title}"></span></div>
+                                                <div class="member-name"><span th:text="${task.member_name}"></span></div>
+                                            </div>
+                                            <hr>
+                                            <div class="card-content-wrap">
+                                                <div class="card-content">
+                                                    <span>숙제 내용</span>
+                                                    <div class="task-content"><span class="data" th:text="${task.task_content}"></span></div>
+                                                        <div class="task-contentlist">
+                                                            <div class="task-chapter">진도 : <span class="data" th:text="${task.task_chapter}"></span></div>
+                                                            <div class="task-deadline">제출 기한 : <span class="data" th:text="${#dates.format(task.task_deadline, 'yyyy-MM-dd')}"></span></div>
+                                                            <div class="task-state"> 상태 :
+                                                            <span class="data" th:text="${task.task_state}" th:style="${task.task_state == '미작성' ? 'color: red;' : 'color: green;'}"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-button">
+                                                    <div class="button-wrap">
+                                                         <a th:if="${task.task_state == '미작성'}">
+                                                            <input type="button" class="writeBtn" value="숙제하기" th:attr = "data-tasksend-no =${task.tasksend_no}">
+                                                        </a>
+                                                        <a th:if="${task.task_state == '작성중'}">
+                                                            <input type="button" class="modifyBtn" value="수정하기" th:attr = "data-tasksend-no =${task.tasksend_no}">
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="progress-wrap">
+        <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+            <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+        </svg>
+    </div>
+    <!--숙제 작성 모달-->
+    <div class="modal-bg"></div>
+    <div id="writeModal" class="modal">
+        <form th:action="@{/student/saveTask}" method="post">
+            <div class="modal-wrap">
+                <div class="modal-task-title">
+                    <span class="m_title" id="modal-title"></span>
+                </div>
+                <div class="modal-task-educator">
+                    <span class="label">교육자 :</span>
+                    <span class="m_educator" id="modal-name"></span>
+                </div>
+                <div class="modal-task-content">
+                    <span class="label">숙제내용📝</span>
+                    <br><span class="m_content" id="modal-content"></span>
+                </div>
+                <div class="modal-task-chapter">
+                    <span class="label">진도 :</span>
+                    <span class="m_chapter" id="modal-chapter"></span>
+                </div>
+                <div class="modal-task-deadline">
+                    <span class="label">제출 기한 :</span>
+                    <span class="m_deadline" id="modal-deadline"></span>
+                </div>
+                <div class="modal-task-state">
+                    <span class="label">상태 :</span>
+                    <span class="m_state" id="modal-state"></span>
+                </div>
+            </div>
+            <hr class="modal-divider">
+            <div class="modal-wrap2">
+                <div class="modal-chapter">
+                    <input type="hidden" name="tasksend_no" id="modal-tasksend-no">
+                    <input type="hidden" name="task_no" id="modal-task-no">
+                    <span>진도</span>
+                    <input id="m-tasksubmit_chapter" class="tasksubmit_chapter" type="text" name="tasksubmit_chapter" maxlength="10">
+                </div>
+                <div class="modal-learning-content">
+                    <span>금번 학습 내용</span>
+                    <textarea id="m-tasksubmit_content" class="tasksubmit_content" name="tasksubmit_content" maxlength="100"></textarea>
+                </div>
+                <div class="modal-add-content">
+                    <span>추가 질의 내용</span>
+                    <input id="m-tasksubmit_add" class="tasksubmit_add" type="text" name="tasksubmit_add" maxlength="100">
+                </div>
+            </div>
+            <div class="modalBtn">
+                <button type="submit" class="save" disabled>저장</button>
+                <input type="button" class="cancel" value="닫기">
+            </div>
+        </form>
+    </div>
+    <!--수정하기 모달-->
+    <div id="modifyModal" class="modal">
+        <form th:action="@{/student/taskModify}" method="post">
+            <div class="modal-wrap">
+                <div class="modal-task-title">
+                    <span class="m_title" id="m-game-name"></span>
+                </div>
+                <div class="modal-task-educator">
+                    <span class="m_educator" id="m-member-name"></span>
+                </div>
+                <div class="modal-task-content">
+                    <span>숙제내용:</span>
+                    <br><span class="m_content" id="m-task-content"></span>
+                </div>
+                <div class="modal-task-chapter">진도 :
+                    <span class="m_chapter" id="m-task-chapter"></span>
+                </div>
+                <div class="modal-task-deadline">제출 기한 :
+                    <span class="m_deadline" id="m-task-deadline"></span>
+                </div>
+                <div class="modal-task-state">상태 :
+                    <span class="m_state" id="m-task-state"></span>
+                    <input type="hidden" name="task_state" id="update-task-state">
+                </div>
+            </div>
+            <hr class="modal-divider">
+            <div class="modal-wrap2">
+                <div class="modal-chapter">
+                    <input type="hidden" name="tasksend_no" id="m-tasksend-no">
+                    <input type="hidden" name="task_no">
+                    <span>진도</span>
+                    <input id="tasksubmit_chapter" class="tasksubmit_chapter" type="text" name="tasksubmit_chapter" maxlength="10">
+                </div>
+                <div class="modal-learning-content">
+                    <span>금번 학습 내용</span>
+                    <textarea id="tasksubmit_content" class="tasksubmit_content" type="text" name="tasksubmit_content" maxlength="100"></textarea>
+                </div>
+                <div class="modal-add-content">
+                    <span>추가 질의 내용</span>
+                    <input id="tasksubmit_add" class="tasksubmit_add" type="text" name="tasksubmit_add" maxlength="100">
+                </div>
+            </div>
+            <div class="modalBtn">
+                <button type="submit" class="saveBtn" disabled>저장</button>
+                <input type="button" class="cancelBtn" value="닫기">
+            </div>
+        </form>
+    </div>
+</div>
+<div th:replace="~{common/fragments/footer :: footerFragment}"></div>
+</body>
+</html>

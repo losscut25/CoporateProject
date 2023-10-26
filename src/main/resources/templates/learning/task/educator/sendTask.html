@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<head>
+    <meta charset="UTF-8">
+    <title>둑며들다|숙제 배포</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/learning/task/educator/sendTask.css}">
+    <script type="text/javascript" th:src="@{/js/learning/task/educator/sendTask.js}"></script>
+    <div th:replace="~{common/fragments/config :: configFragment}"></div>
+</head>
+<body>
+<div th:replace="~{common/fragments/header :: headerFragment}"></div>
+<div class="content">
+    <div th:replace="~{common/sidebar/edu_sidebar :: edu_sidebarFragment}"></div>
+    <div class="content-wrap">
+        <div class="table-title-wrap">
+            <div class="table-title-wrap">
+                <h2 class="table-title">숙제 목록👀</h2>
+            </div>
+            <div class="select-box">
+                <select id="selectTaskTitle" name="task_title">
+                    <option value="" name="task_title">전체</option>
+                    <th:block th:each="title : ${taskTitle}">
+                        <option th:value="${title}" th:text="${title}" name="task_title"></option>
+                    </th:block>
+                </select>
+                <input type="button" class="selectTaskBtn" value="조회하기" id="selectTaskBtn">
+            </div>
+            <form th:action="@{/educator/sendToMember}" method="post">
+                <div class="task-wrap">
+                    <div class="task-detail" >
+                        <div class="table-wrap">
+                            <span class="taskNoMsg" style="color: red;  margin-left: 25px;"></span>
+                            <table class="list-table">
+                                <thead class="table-head">
+                                <tr>
+                                    <th class="t_no"> </th>
+                                    <th class="t_name">숙제명</th>
+                                    <th class="t_content">숙제내용</th>
+                                    <th class="t_progress">진도</th>
+                                    <th class="t_deadline">제출기한</th>
+                                    <th class="t_detail">상세조회</th>
+                                </tr>
+                                </thead>
+                                <tbody class="tbody-container" id="taskTableBody">
+                                <th:block th:if="${#lists.isEmpty(taskPageDTO.taskList)}">
+                                    <tr>
+                                        <td colspan="6">생성한 숙제가 없습니다.</td>
+                                    </tr>
+                                </th:block>
+                                <th:block th:if="${not #lists.isEmpty(taskPageDTO.taskList)}">
+                                    <tr class="tr-list"  th:each="list : ${taskPageDTO.taskList}">
+                                        <td class="list_no">
+                                            <label class="checkbox-wrap">
+                                                <input type="checkbox" th:value="${list.task_no}" name="task_no[]">
+                                                <span class="checkmark" th:value="${list.task_no}" ></span>
+                                            </label>
+                                        </td>
+                                        <td class="list_name" th:text="${list.task_title}"></td>
+                                        <td class="list_content" th:text="${list.task_content}"></td>
+                                        <td class="list_progress" th:text="${list.task_chapter}"></td>
+                                        <td class="list_limit" ><span th:text="${#dates.format(list.task_deadline, 'yyyy-MM-dd')}"></span></td>
+                                        <td class="detailBtn-wrap">
+                                            <button class="detailBtn" data-task_no="${list.task_no}">
+                                                <i class="ri-search-eye-line" data-task_no="${list.task_no}"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </th:block>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <div class="paging">
+                                <div class="text-center clearfix">
+                                    <div class="pagingNum">
+                                        <ul class="pagination-container" id="pagination">
+                                            <li th:if="${taskPageDTO.startPage > 5}" class="page-item">
+                                                <a class="page-link" th:with="prevPage=${taskPageDTO.startPage - 1}" th:href="@{/educator/sendTask(page=${prevPage},task_title=${task_title})}">Prev</a>
+                                            </li>
+                                            <li th:if="${pageNum > 0}" th:each="pageNum : ${#numbers.sequence(taskPageDTO.startPage, taskPageDTO.endPage)}" class="page-item">
+                                                <a th:href="@{/educator/sendTask(page=${pageNum},task_title=${task_title})}" class="page-link" th:classappend="${currentPage == pageNum} ? 'active-page' : ''"><span th:text="${pageNum}"></span></a>
+                                            </li>
+                                            <li th:if="${taskPageDTO.endPage < taskPageDTO.totalPages}" class="page-item">
+                                                <a class="page-link" th:with="nextPage=${taskPageDTO.startPage + 5}" th:href="@{/educator/sendTask(page=${nextPage},task_title=${task_title})}">Next</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr class="divider">
+                <div class="table-title-wrap">
+                    <h2 class="table-title" id="table-title">수강생 목록👩‍👩‍👧</h2>
+                </div>
+                <div class="table-wrap">
+                    <div class="select-box">
+                        <select id="selectGroupTitle" name="group_no">
+                            <option value="" name="group_name">선택</option>
+                            <th:block th:each="title : ${groupName}">
+                                <option  th:value="${title.group_no}" th:text="${title.group_name}" th:attr="data-groupNo=${title.group_no}, data-groupName=${title.group_name}" name="group_no"></option>
+                            </th:block>
+                        </select>
+                        <div class="button-wrap">
+                            <input type="button" class="selectMemberBtn" value="조회하기" id="selectGroupBtn">
+                            <input type="button" class="selectAllBtn" value="전체선택" id="selectAllBtn">
+                            <input type="button" class="sendTaskBtn"  value="전송하기" id="sendTaskBtn">
+                        </div>
+                    </div>
+                    <div class="errorMsg">
+                        <span class="groupNameMsg" style="color: red;  margin: 10px 15px;"></span>
+                    </div>
+                    <div class="member_wrap">
+                        <span class="memberNoMsg" style="color: red; margin: 25px;"></span>
+                        <div class="table-container">
+                            <div class="table-left">
+                                <table class="list-table">
+                                    <thead class="table-head">
+                                    <tr>
+                                        <th class="t_no"> </th>
+                                        <th class="t_member">학습자명</th>
+                                        <th class="t_phone">전화번호</th>
+                                        <th class="t_level">현재 레벨</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="tbody-container" id="memberTableBodyLeft">
+                                    <th:block th:if="${not #lists.isEmpty(groupDetail)} and ${check != ''}">
+                                        <tr class="tr-list" th:each="list, iterStat : ${groupDetail}">
+                                            <th:block th:if="${iterStat.index % 2 == 0}">
+                                                <td class="list_groupNo">
+                                                    <label class="checkbox-wrap">
+                                                        <input class="checkbox" type="checkbox" th:value="${list.member_no}" name="member_no[]">
+                                                        <span class="checkmark" th:value="${list.member_no}" ></span>
+                                                    </label>
+                                                </td>
+                                                <td class="list_member" th:text="${list.member_name}"></td>
+                                                <td class="list_phone" th:text="${list.member_phone}"></td>
+                                                <td class="list_level" th:text="${list.member_level}"></td>
+                                            </th:block>
+                                        </tr>
+                                    </th:block>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="table-right">
+                                <table class="list-table">
+                                    <thead class="table-head">
+                                    <tr>
+                                        <th class="t_no"> </th>
+                                        <th class="t_member">학습자명</th>
+                                        <th class="t_phone">전화번호</th>
+                                        <th class="t_level">현재 레벨</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="tbody-container" id="memberTableBodyRight">
+                                    <!-- 오른쪽 테이블에 뿌려질 내용 -->
+                                    <th:block th:if="${not #lists.isEmpty(groupDetail)} and ${check != ''}">
+                                        <tr class="tr-list" th:each="list, iterStat : ${groupDetail}">
+                                            <!-- 홀수 번째 행만 오른쪽 테이블에 나타나도록 필터링 -->
+                                            <th:block th:if="${iterStat.index % 2 != 0}">
+                                                <td class="list_groupNo">
+                                                    <label class="checkbox-wrap">
+                                                        <input class="checkbox" type="checkbox" th:value="${list.member_no}" name="member_no[]">
+                                                        <span class="checkmark" th:value="${list.member_no}" ></span>
+                                                    </label>
+                                                </td>
+                                                <td class="list_member" th:text="${list.member_name}"></td>
+                                                <td class="list_phone" th:text="${list.member_phone}"></td>
+                                                <td class="list_level" th:text="${list.member_level}"></td>
+                                            </th:block>
+                                        </tr>
+                                    </th:block>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--숙제 전송 모달-->
+                <div id="myModal2" class="modal2" style="display:none;">
+                    <div class="modal-wrap2">
+                        <div class="modal-task-title">
+                            <div class="modal-content-title">
+                                <span>숙제가 전송되었습니다!</span>
+                            </div>
+                        </div>
+                        <div class="modalBtn">
+                            <button type="submit" class="submit" id="sendTask">확인</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--상세보기 모달-->
+<div class="modal-bg"></div>
+<div id="myModal" class="modal" style="display:none;">
+    <div class="modal-wrap">
+        <div class="modal-title-content">
+            <span class="modal-title">🔎 생성한 숙제 상세보기</span>
+        </div>
+        <hr class="modal-divider">
+        <div class="modal-content-title">
+            <div class="modal-content-label">숙제명</div>
+            <div id="modal-task-title" class="modal-content-value"></div>
+        </div>
+        <div class="modal-content">
+            <div class="modal-task-content">
+                <div class="modal-content-label">내용</div>
+                <div id="modal-task-content" class="modal-content-value"></div>
+            </div>
+            <div class="modal-task-chapter">
+                <div class="modal-content-label">진도</div>
+                <div id="modal-task-chapter" class="modal-content-value"></div>
+            </div>
+            <div class="modal-task-deadline">
+                <div class="modal-content-label">제출기한</div>
+                <div id="modal-task-deadline" class="modal-content-value"></div>
+            </div>
+        </div>
+        <div class="modalBtn">
+            <button class="conceal">닫기</button>
+        </div>
+    </div>
+</div>
+</body>
+<div th:replace="~{common/fragments/footer :: footerFragment}"></div>
+</html>

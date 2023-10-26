@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>둑며들다|학습 그룹 가입신청</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/learning/group/student/myGroupList.css}">
+    <script type="text/javascript" th:src="@{/js/learning/group/student/myGroupList.js}"></script>
+    <!--공통으로 쓰이는 CSS 및  -->
+    <div th:replace="~{common/fragments/config :: configFragment}"></div>
+
+</head>
+<style>
+.progress-wrap {
+  position: fixed;
+  right: 50px;
+  bottom: 50px;
+  height: 46px;
+  width: 46px;
+  cursor: pointer;
+  display: block;
+  border-radius: 50px;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(15px);
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+
+.progress-wrap.active-progress {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.progress-wrap::after {
+  position: absolute;
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  content: '\f062';
+  text-align: center;
+  line-height: 46px;
+  font-size: 18px;
+  color: #1f2029;
+  left: 0;
+  top: 0;
+  height: 46px;
+  width: 46px;
+  cursor: pointer;
+  display: block;
+  z-index: 1;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+
+.lightScrollIcon::after {
+  color: #ecedf3 !important;
+}
+
+.progress-wrap:hover::after {
+  opacity: 0;
+}
+
+.progress-wrap::before {
+  position: absolute;
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  content: '\f062';
+  text-align: center;
+  line-height: 46px;
+  font-size: 18px;
+  opacity: 0;
+  background-image: linear-gradient(298deg, #da2c4d, #f8ab37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  left: 0;
+  top: 0;
+  height: 46px;
+  width: 46px;
+  cursor: pointer;
+  display: block;
+  z-index: 2;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+
+.progress-wrap:hover::before {
+  opacity: 1;
+}
+
+.progress-wrap svg path {
+  fill: none;
+}
+
+.progress-wrap svg.progress-circle path {
+  stroke: #1f2029;
+  stroke-width: 4;
+  box-sizing: border-box;
+  -webkit-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+
+</style>
+<script>
+    (function($) { "use strict";
+
+$(document).ready(function(){"use strict";
+
+		//Scroll back to top
+
+		var progressPath = document.querySelector('.progress-wrap path');
+		var pathLength = progressPath.getTotalLength();
+		progressPath.style.transition = progressPath.style.WebkitTransition = 'none';
+		progressPath.style.strokeDasharray = pathLength + ' ' + pathLength;
+		progressPath.style.strokeDashoffset = pathLength;
+		progressPath.getBoundingClientRect();
+		progressPath.style.transition = progressPath.style.WebkitTransition = 'stroke-dashoffset 10ms linear';
+		var updateProgress = function () {
+			var scroll = $(window).scrollTop();
+			var height = $(document).height() - $(window).height();
+			var progress = pathLength - (scroll * pathLength / height);
+			progressPath.style.strokeDashoffset = progress;
+		}
+		updateProgress();
+		$(window).scroll(updateProgress);
+		var offset = 50;
+		var duration = 550;
+		jQuery(window).on('scroll', function() {
+			if (jQuery(this).scrollTop() > offset) {
+				jQuery('.progress-wrap').addClass('active-progress');
+			} else {
+				jQuery('.progress-wrap').removeClass('active-progress');
+			}
+		});
+		jQuery('.progress-wrap').on('click', function(event) {
+			event.preventDefault();
+			jQuery('html, body').animate({scrollTop: 0}, duration);
+			return false;
+		})
+
+
+	});
+
+})(jQuery);
+</script>
+<body>
+<div th:replace="~{common/fragments/header :: headerFragment}"></div>
+<div class="content">
+    <div th:replace="~{common/sidebar/stu_sidebar :: stu_sidebarFragment}"></div>
+    <div class="content-wrap">
+        <div class="content_header">
+            <div class="keyword-container">
+                <h2>그룹명</h2>
+                <div class="select-menu-group">
+                    <div class="select-btn-group">
+                        <span class="sBtn-text">전체</span>
+                        <i class="bx bx-chevron-down"></i>
+                    </div>
+                    <ul class="options">
+                        <li class="option">
+                            <span class="option-text" th:value="${groupTitle}">전체</span>
+                        </li>
+                        <li class="option" th:each="title : ${title}">
+                            <span class="option-text" th:text="${title.group_name}"></span>
+                        </li>
+                    </ul>
+                </div>
+                <h2>교육자명</h2>
+                <div class="select-menu-educator">
+                    <div class="select-btn-educator">
+                        <span class="sBtn-text-educator" th:value="${educatorTitle}">전체</span>
+                        <i class="bx bx-chevron-down"></i>
+                    </div>
+                    <ul class="options">
+                        <li class="option">
+                            <span class="option-text-educator">전체</span>
+                        </li>
+                        <li class="option" th:each="educator : ${educator}">
+                            <span class="option-text-educator" th:attr="data-m-no=${educator.member_no}" th:text="${educator.member_name}"></span>
+                        </li>
+                    </ul>
+                </div>
+                <button class="search-btn">조회</button>
+            </div>
+        </div>
+        <div class="content-container">
+            <ul class="list-box">
+                <li class="" th:each="joinList : ${groupJoinList}" th:attr="data-gm-no=${joinList.gm_no}">
+                    <input hidden="hidden" class="attr" th:attr="data-group-name=${joinList.group_name},data-game-no=${joinList.game_no},data-group-no=${joinList.group_no},data-member-no=${joinList.member_no}">
+                    <div class="checkbox">
+                        <label class="checkbox-wrapper">
+                            <input type="text" class="checkbox-input"  th:attr="data-game-no=${joinList.game_no},data-group-no=${joinList.group_no}"/>
+                            <span class="checkbox-tile">
+                                <div class="card">
+                                    <div class="poster"><img th:src="@{|/image/game/${joinList.filegame_name}|}"></div>
+                                    <div class="card-details"></div>
+                                    <div class="details">
+                                        <h5>게임콘텐츠명 : <span th:text="${joinList.game_title}"></span></h5>
+                                        <h5>그룹명 : <span th:text="${joinList.group_name}"></span></h5>
+                                        <h5>교육자명 : <span th:text="${joinList.member_name}"></span></h5>
+                                        <h5>학습 구독 기간 : <span th:text="${joinList.group_startdate}"></span> ~ <span th:text="${joinList.group_enddate}"></span></h5>
+                                        <h5>가입 상태 : <span th:text="${joinList.approve_state}"></span></h5>
+                                    </div>
+                                </div>
+                                </span>
+                        </label>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="content_footer">
+            <button id="moreBtn">더보기(<span class="currentCnt"></span>/<span class="totalCnt" th:text="${totalCnt}"></span>)<i class="ri-arrow-down-s-line"></i></button>
+        </div>
+    </div>
+</div>
+<div class="progress-wrap">
+    <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+    </svg>
+</div>
+<div th:replace="~{common/fragments/footer :: footerFragment}"></div>
+</body>
+</html>
